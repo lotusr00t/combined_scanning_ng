@@ -1,0 +1,128 @@
+#!/bin/bash
+
+clear
+echo
+echo combined_scanning_ng
+echo
+echo "By TT Le (@lotusr00t)"
+echo "Adapted from Lee Baird's combined_scanning script (http://www.pentesterscripting.com/recon/combined_scanning)"
+echo March 05, 2013
+echo "v 0.1"
+echo
+echo "This script performs various reconnaissance on your target domain."
+echo
+
+
+recon()
+{
+  echo
+  echo "###########################################################################################"
+  echo
+  echo "whois" $domain
+  whois $domain
+  echo "###########################################################################################"
+  echo
+  echo "dig" $domain "any"
+  dig $domain any
+  echo "###########################################################################################"
+  echo
+  echo "host -l" $domain
+  echo
+  host -l $domain
+  echo
+  echo "###########################################################################################"
+  echo
+  echo "tcptraceroute -i eth0" $domain
+  echo
+  tcptraceroute -i eth0 $domain
+  echo
+  echo "###########################################################################################"
+  echo
+  echo "cd /pentest/enumeration/dns/dnsenum"
+  echo "perl dnsenum.pl --enum -f dns.txt --update a -r" $domain
+  echo
+  cd /pentest/enumeration/dns/dnsenum
+  perl dnsenum.pl --enum -f dns.txt --update a -r $domain
+  echo
+  echo "###########################################################################################"
+  echo
+  echo dnstracer $domain
+  echo
+  dnstracer $domain
+  echo
+  echo "###########################################################################################"
+  echo
+  echo "cd /pentest/enumeration/dns/fierce"
+  echo "perl fierce.pl -dns" $domain
+  echo
+  cd /pentest/enumeration/dns/fierce
+  perl fierce.pl -dns $domain
+  echo
+  echo "###########################################################################################"
+  echo
+  echo "cd /pentest/enumeration/web/lbd"
+  echo "./lbd.sh" $domain
+  cd /pentest/enumeration/web/lbd
+  ./lbd.sh $domain
+  echo "###########################################################################################"
+  echo
+  echo "cd /pentest/enumeration/list-urls"
+  echo "./list-urls.py http://www."$domain
+  cd /pentest/enumeration/list-urls
+  ./list-urls.py http://www.$domain
+  echo
+  echo "###########################################################################################"
+  echo
+  echo "nmap -PN -n -F -T4 -sV -A --script=banner -oG ${domain}_recon.txt" $domain
+  cd ~
+  nmap -PN -n -F -T4 -sV -A --script=banner -oG $domain\_recon.txt $domain
+  echo
+  echo "###########################################################################################"
+  echo
+  echo "amap -i ${domain}_recon.txt"
+  amap -i $domain\_recon.txt
+  echo
+  echo "###########################################################################################"
+  echo
+  echo "Checking for web server's header"
+  echo "nc -v $domain 80"
+  echo
+  printf "HEAD / HTTP/1.0\r\n\r\n" | nc $domain -v 80
+  echo
+  echo "###########################################################################################"
+}
+
+main()
+{
+echo "Enter a domain to be scanned ..."
+read domain
+check_host=`host $domain | grep "not found" | wc -l`
+if [ $check_host -gt 0 ]; then
+  echo "Domain $domain cannot be found. Check to make sure you have the correct domain name."
+  exit 1337
+else
+  echo "Scanning the domain $domain. Sit back, grab a cold beer and enjoy."
+  recon
+fi
+
+echo "The domain $domain has been scanned."
+echo "Do you want to scan more domain(s)? Answer Yes|Y|y or No|N|n"
+read answer
+
+case $answer in
+
+"Yes"|"Y"|"YES"|"y")
+  main
+;;
+"No"|"N"|"NO"|"n")
+	echo "Goodbye."
+;;
+*)
+	echo "Invalid response."
+	exit 13
+;;
+
+esac
+}
+
+main
