@@ -19,4 +19,4 @@ dnsenum.pl
 tcptraceroute
 dnstracer
 fierce.pl
-list-urls.pl
+list-urls.py
