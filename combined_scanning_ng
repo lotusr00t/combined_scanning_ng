@@ -73,9 +73,9 @@ recon()
   echo
   echo "###########################################################################################"
   echo
-  echo "nmap -PN -n -F -T4 -sV -A --script=banner -oG ${domain}_recon.txt" $domain
+  echo "nmap -PN -n -F -T4 -sV -A --script banner,discovery,http* -oG ${domain}_recon.txt" $domain
   cd ~
-  nmap -PN -n -F -T4 -sV -A --script=banner -oG $domain\_recon.txt $domain
+  nmap -PN -n -F -T4 -sV -A --script banner,discovery,http* -oG $domain\_recon.txt $domain
   echo
   echo "###########################################################################################"
   echo
